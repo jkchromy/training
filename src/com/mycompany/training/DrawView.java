@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.*;
 //import android.os.Parcelable;
 
 public class DrawView extends View {
@@ -18,6 +19,8 @@ public class DrawView extends View {
 	static Random random = new Random();
 	MainActivity mA;
 	List<Ball> balls;
+	List<Ball> sparkles;
+	List<Ball> addedBalls;
 	int updateCount;
 	float maxMem;
 	float totalMem;
@@ -31,6 +34,8 @@ public class DrawView extends View {
 		paint.setColor(Color.BLUE);
 		paint.setTextSize(50);
 		balls = new ArrayList<Ball>();
+		sparkles = new ArrayList<Ball>();
+		addedBalls = new ArrayList<Ball>();
 	    //balls.add(new Ball(100, 100, 1, 1, 10, getWidth(), getHeight(), Ball.TYPE.NORMAL));
 		updateCount = 0;
 		//java.lang.System.console().printf("test");
@@ -68,36 +73,37 @@ public class DrawView extends View {
 		default:
 		switch (random.nextInt(3)) {
 		case 0:
-		while (balls.size() >= 100)
-			balls.remove(0);
-		balls.add(new Ball(event.getX(), event.getY(),
+		addedBalls.add(new Ball(event.getX(), event.getY(),
 				random.nextFloat()*2-1,
 				random.nextFloat()*2-1, 10,
 				getWidth(), getHeight(), Ball.TYPE.EXPAND));
 		break;
 		case 1:
 		case 2:
-		balls.add(new Ball(event.getX(), event.getY(),0 , 0, 10,
+		    addedBalls.add(new Ball(event.getX(), event.getY(),0 , 0, 10,
 				getWidth(), getHeight(), Ball.TYPE.NORMAL));
-		} break;
+		    } break;
 		}
-		while (balls.size() >= 100)
-			balls.remove(0);
 		return super.onTouchEvent(event);
 	}
 	
 	public void update() {
 		updateCount++;
-		List<Ball> sparkles = new ArrayList<Ball>();
 		for (Ball b: balls) {
 		    b.update();
 			if (b.type == Ball.TYPE.EXPAND && b.ballRadius > 1 && balls.size() < 100) {
 				if (updateCount % 10 == 0) {
-					//sparkles.add(sparkle(b));
+					try {
+					    sparkles.add(sparkle(b));
+					}
+					catch (ConcurrentModificationException e) {} // TODO: This is the fatal error being thrown.
 				}		
 			}
 		}
 		balls.addAll(sparkles);
+		sparkles.clear();
+		balls.addAll(addedBalls);
+		addedBalls.clear();
 		this.postInvalidate();
 		
 		/*this.postInvalidate((int)Math.ceil(ballX-ballRadius),

@@ -5,9 +5,12 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.io.*;
 import java.util.logging.*;
 import java.lang.Runtime;
+import android.util.AndroidException;
+import android.util.AndroidRuntimeException;
+import java.io.PrintWriter;
+import java.io.*;
 
 public class MainActivity extends Activity
 {
@@ -17,7 +20,7 @@ public class MainActivity extends Activity
 	class Task extends TimerTask {
 		@Override
 		public void run() {
-			drawView.update();
+		    drawView.update();
 		}
 	}
 	

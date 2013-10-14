@@ -51,9 +51,14 @@ public class DrawView extends View {
 		//canvas.drawText("ballY: " + ballY, 0, 500, paint);
 		canvas.drawText("#balls: " + balls.size(), 0, 600, paint);
 //		canvas.drawText("updateCount: " + updateCount, 0, 700, paint);
-		for (Ball b:balls)
+		/*for (Ball b:balls)
+			canvas.drawCircle(b.ballX, b.ballY, b.ballRadius, paint);*/
+		Iterator iter = balls.iterator();
+		Ball b;
+		while (iter.hasNext()) {
+			b = (Ball)iter.next();
 			canvas.drawCircle(b.ballX, b.ballY, b.ballRadius, paint);
-		
+		}
 	/*	float textSize = paint.getTextSize();
 		paint.setTextSize(30);
 		drawClass(canvas, paint, paint.getTextSize());

@@ -20,7 +20,6 @@ public class DrawView extends View {
 	MainActivity mA;
 	List<Ball> balls;
 	List<Ball> sparkles;
-	List<Ball> addedBalls;
 	int updateCount;
 	float maxMem;
 	float totalMem;
@@ -35,7 +34,6 @@ public class DrawView extends View {
 		paint.setTextSize(50);
 		balls = new ArrayList<Ball>();
 		sparkles = new ArrayList<Ball>();
-		addedBalls = new ArrayList<Ball>();
 	    //balls.add(new Ball(100, 100, 1, 1, 10, getWidth(), getHeight(), Ball.TYPE.NORMAL));
 		updateCount = 0;
 		//java.lang.System.console().printf("test");
@@ -51,14 +49,9 @@ public class DrawView extends View {
 		//canvas.drawText("ballY: " + ballY, 0, 500, paint);
 		canvas.drawText("#balls: " + balls.size(), 0, 600, paint);
 //		canvas.drawText("updateCount: " + updateCount, 0, 700, paint);
-		/*for (Ball b:balls)
-			canvas.drawCircle(b.ballX, b.ballY, b.ballRadius, paint);*/
-		Iterator iter = balls.iterator();
-		Ball b;
-		while (iter.hasNext()) {
-			b = (Ball)iter.next();
+		List<Ball> temp = new ArrayList<Ball>(balls);
+		for (Ball b:temp)
 			canvas.drawCircle(b.ballX, b.ballY, b.ballRadius, paint);
-		}
 	/*	float textSize = paint.getTextSize();
 		paint.setTextSize(30);
 		drawClass(canvas, paint, paint.getTextSize());
@@ -72,23 +65,27 @@ public class DrawView extends View {
 	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+		List<Ball> tempBalls = new ArrayList<Ball>();
 		switch (event.getAction()) {
-		case MotionEvent.ACTION_DOWN: break;
+		case MotionEvent.ACTION_DOWN:
+		explosion(tempBalls, event);
+		break;
 		case MotionEvent.ACTION_UP: break;
 		default:
-		switch (random.nextInt(3)) {
+		switch (random.nextInt(1)) { // Changed to 1 from 3.
 		case 0:
-		addedBalls.add(new Ball(event.getX(), event.getY(),
+		tempBalls.add(new Ball(event.getX(), event.getY(),
 				random.nextFloat()*2-1,
 				random.nextFloat()*2-1, 10,
 				getWidth(), getHeight(), Ball.TYPE.EXPAND));
 		break;
 		case 1:
 		case 2:
-		    addedBalls.add(new Ball(event.getX(), event.getY(),0 , 0, 10,
+		    tempBalls.add(new Ball(event.getX(), event.getY(),0 , 0, 10,
 				getWidth(), getHeight(), Ball.TYPE.NORMAL));
 		    } break;
 		}
+		balls.addAll(tempBalls);
 		return super.onTouchEvent(event);
 	}
 	
@@ -96,19 +93,14 @@ public class DrawView extends View {
 		updateCount++;
 		for (Ball b: balls) {
 		    b.update();
-			if (b.type == Ball.TYPE.EXPAND && b.ballRadius > 1 && balls.size() < 100) {
+			if (b.type == Ball.TYPE.EXPAND && b.ballRadius > 1 && balls.size() < 1000) {
 				if (updateCount % 10 == 0) {
-					try {
 					    sparkles.add(sparkle(b));
-					}
-					catch (ConcurrentModificationException e) {} // TODO: This is the fatal error being thrown.
 				}		
 			}
 		}
 		balls.addAll(sparkles);
 		sparkles.clear();
-		balls.addAll(addedBalls);
-		addedBalls.clear();
 		this.postInvalidate();
 		
 		/*this.postInvalidate((int)Math.ceil(ballX-ballRadius),
@@ -164,13 +156,20 @@ public class DrawView extends View {
 						   getWidth(), getHeight(), Ball.TYPE.EXPAND);
 	}
 	
+	private void explosion(List<Ball> tempBalls, MotionEvent event) {
+		for (int x=0;x<10;++x) {
+			tempBalls.add(new Ball(event.getX(), event.getY(),
+							   random.nextFloat()*6-3,
+							   random.nextFloat()*6-3, 1,
+							   getWidth(), getHeight(), Ball.TYPE.EXPAND));
+		}
+	}
 	private void drawClass(Canvas canvas, Paint paint, float textHeight) {
 		int rowCount = 1;
         int colCount = 0;
         float textWidth = 15;
 		canvas.drawText(getContentDescription(), 0, getContentDescription().length(),
-                        0, textHeight, paint);
-        
+                        0, textHeight, paint);    
 		/*for (Field f:getClass().getFields()) {
 			canvas.drawText(f.toString(), 0, textHeight*rowCount, paint);
 			rowCount++;
